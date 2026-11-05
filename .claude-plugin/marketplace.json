@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "claude-harvest",
+  "description": "Save what a Claude Code session learned before it compacts",
+  "owner": { "name": "NathnC" },
+  "plugins": [
+    {
+      "name": "harvest",
+      "description": "/harvest saves what a session learned to memory files and CLAUDE.md, and reminds you to run it before the chat compacts.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

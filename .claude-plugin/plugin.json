@@ -1,0 +1,10 @@
+{
+  "name": "harvest",
+  "description": "/harvest saves what a Claude Code session learned to memory files and CLAUDE.md, and reminds you to run it before the chat compacts.",
+  "version": "0.1.0",
+  "author": { "name": "NathnC" },
+  "license": "MIT",
+  "repository": "https://github.com/NathnC/claude-harvest",
+  "homepage": "https://github.com/NathnC/claude-harvest#readme",
+  "keywords": ["memory", "claude-md", "compaction", "session", "context"]
+}
