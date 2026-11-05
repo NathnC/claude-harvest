@@ -13,7 +13,13 @@ Install the claude-harvest plugin for me from https://github.com/NathnC/claude-h
 5. Tell me to restart Claude Code, then summarise in two lines how to use /harvest.
 ```
 
-Or install by hand:
+Or type this at the Claude Code prompt:
+
+```text
+/plugin install harvest --marketplace NathnC/claude-harvest
+```
+
+Or install from a terminal:
 
 ```bash
 claude plugin marketplace add NathnC/claude-harvest
