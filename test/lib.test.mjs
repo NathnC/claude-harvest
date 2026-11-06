@@ -79,7 +79,7 @@ test('native 1M detection follows the documented model list', () => {
 });
 
 test('compaction points use the documented defaults', () => {
-  assert.deepEqual(compactionPoints({ model: 'claude-opus-5-5' }), { auto: 967000, idle: 200000, autoEnabled: true });
+  assert.deepEqual(compactionPoints({ model: 'claude-opus-5-5' }), { window: 1000000, auto: 967000, idle: 200000, autoEnabled: true });
   assert.equal(compactionPoints({ model: 'claude-sonnet-4-6' }).auto, 200000);
   assert.equal(compactionPoints({ model: 'claude-opus-4-6', tokens: 400000 }).auto, 967000);
   assert.equal(compactionPoints({ model: 'claude-opus-5-5', env: { CLAUDE_CODE_DISABLE_1M_CONTEXT: '1' } }).auto, 200000);
@@ -116,13 +116,37 @@ test('Stop stays silent below the threshold', () => {
 
 test('Stop nudges once per threshold', () => {
   const file = transcript(assistant(172000));
-  assert.match(message(run('Stop', file)), /172k tokens.*can compact from 200k.*\/harvest/);
+  assert.match(message(run('Stop', file)), /172k of 1M.*about 967k, or from 200k if left idle.*\/harvest/);
   assert.deepEqual(run('Stop', file), {});
 });
 
 test('Stop message says the chat is past the idle point on a 1M model', () => {
   const file = transcript(assistant(320000, 'claude-opus-5-5'));
-  assert.match(message(run('Stop', file)), /about an hour idle, or at about 967k/);
+  assert.match(message(run('Stop', file)), /320k of 1M.*about 967k, or after about an hour idle/);
+});
+
+test('Stop message shows a 200k window with no idle clause', () => {
+  const file = transcript(assistant(172000, 'claude-sonnet-4-6'));
+  const text = message(run('Stop', file));
+  assert.match(text, /172k of 200k\. It compacts at about 200k\./);
+  assert.doesNotMatch(text, /idle/);
+});
+
+test('Stop message shows a 200k window when 1M is disabled', () => {
+  env.CLAUDE_CODE_DISABLE_1M_CONTEXT = '1';
+  assert.match(message(run('Stop', transcript(assistant(172000, 'claude-opus-5-5')))), /172k of 200k\. It compacts at about 200k\./);
+});
+
+test('Stop message follows the auto-compact point when idle compaction is off', () => {
+  fs.writeFileSync(path.join(home, 'settings.json'), '{"idleCompaction":false}');
+  const text = message(run('Stop', transcript(assistant(830000, 'claude-opus-5-5'))));
+  assert.match(text, /830k of 1M\. It compacts at about 967k\./);
+  assert.doesNotMatch(text, /idle/);
+});
+
+test('Stop message gives the real limit when auto-compact is off', () => {
+  fs.writeFileSync(path.join(home, 'settings.json'), '{"autoCompactEnabled":false}');
+  assert.match(message(run('Stop', transcript(assistant(830000, 'claude-opus-5-5')))), /830k of 1M\. Auto-compact is off, so it stops at the 1M limit\./);
 });
 
 test('harvesting silences the nudge until the chat grows again', () => {

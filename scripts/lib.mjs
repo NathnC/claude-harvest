@@ -193,7 +193,7 @@ export function compactionPoints({ model, tokens = 0, env = {}, settings = [] })
     ? Math.max(parseTokens(env.CLAUDE_CODE_IDLE_COMPACT_MIN_TOKENS) ?? IDLE_COMPACT_DEFAULT, 100_000)
     : Infinity;
 
-  return { auto, idle, autoEnabled };
+  return { window, auto, idle, autoEnabled };
 }
 
 // ---- the decisions ---------------------------------------------------------
@@ -206,15 +206,15 @@ export function shouldNudge({ tokens, state, nudgeAt, step }) {
   return baseline === 0 || tokens - baseline >= step;
 }
 
-const kilo = (n) => `${Math.round(n / 1000)}k`;
+const kilo = (n) => (n >= WINDOW_1M ? `${n / WINDOW_1M}M` : `${Math.round(n / 1000)}k`);
 
-export function nudgeMessage(tokens, { auto, idle, autoEnabled }) {
+export function nudgeMessage(tokens, { window, auto, idle, autoEnabled }) {
   let when;
-  if (!autoEnabled) when = `the context limit is about ${kilo(auto)}`;
-  else if (idle < auto && tokens >= idle) when = `it compacts after about an hour idle, or at about ${kilo(auto)}`;
-  else if (idle < auto) when = `it can compact from ${kilo(idle)}`;
-  else when = `it compacts at about ${kilo(auto)}`;
-  return `Harvest: this chat is at ${kilo(tokens)} tokens and ${when}. Run /harvest to save what it learned first.`;
+  if (!autoEnabled) when = `Auto-compact is off, so it stops at the ${kilo(window)} limit`;
+  else if (idle < auto && tokens >= idle) when = `It compacts at about ${kilo(auto)}, or after about an hour idle`;
+  else if (idle < auto) when = `It compacts at about ${kilo(auto)}, or from ${kilo(idle)} if left idle for about an hour`;
+  else when = `It compacts at about ${kilo(auto)}`;
+  return `Harvest: this chat is at ${kilo(tokens)} of ${kilo(window)}. ${when}. Run /harvest to save what it learned first.`;
 }
 
 function isIncognito(env, sessionId) {

@@ -52,7 +52,7 @@ Most sessions yield 0–3 entries, and zero is a valid result. It won't save any
 Once a chat is big enough to compact soon, you'll see this under Claude's reply:
 
 ```text
-Stop says: Harvest: this chat is at 172k tokens and it can compact from 200k. Run /harvest to save what it learned first.
+Stop says: Harvest: this chat is at 172k of 1M. It compacts at about 967k, or from 200k if left idle for about an hour. Run /harvest to save what it learned first.
 ```
 
 The reminder is shown only to you, so it uses no tokens and Claude doesn't act on it.
